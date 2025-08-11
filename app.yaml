@@ -1,0 +1,17 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: avp-test
+spec:
+  destination:
+    namespace: default
+    name: in-cluster    
+  project: default
+  source:
+    repoURL: 'https://github.com/johnasbaghi/argocd-vault-plugin-demo'
+    targetRevision: HEAD
+    path: app
+
+    # This tells ArgoCD to use the plugin to deploy the manifests
+    plugin:
+      name: argocd-vault
