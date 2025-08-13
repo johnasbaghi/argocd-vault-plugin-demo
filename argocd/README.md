@@ -90,4 +90,4 @@ vault-ui                   LoadBalancer   10.96.192.117   172.18.255.1   8200:31
 
 http://172.18.255.1:8200/ui/vault/auth
 
-Note: default token is root
+Note: The default token is root
