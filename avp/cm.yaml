@@ -13,13 +13,13 @@ data:
       allowConcurrency: true
 
       # Note: this command is run _before_ anything is done, therefore the logic is to check if this looks like a Kustomize bundle
-      discover:
-        find:
-          command:
-            - find
-            - "."
-            - -name
-            - kustomization.yaml
+      # discover:
+      #   find:
+      #     command:
+      #       - find
+      #       - "."
+      #       - -name
+      #       - kustomization.yaml
       generate:
         command:
           - sh
@@ -36,12 +36,12 @@ data:
       allowConcurrency: true
 
       # Note: this command is run _before_ any Helm templating is done, therefore the logic is to check if this looks like a Helm chart
-      discover:
-        find:
-          command:
-            - sh
-            - "-c"
-            - "find . -name 'Chart.yaml' && find . -name 'values.yaml'"
+      # discover:
+      #   find:
+      #     command:
+      #       - sh
+      #       - "-c"
+      #       - "find . -name 'Chart.yaml' && find . -name 'values.yaml'"
       generate:
         command:
           - sh
