@@ -1,0 +1,13 @@
+apiVersion: v1
+kind: Secret
+metadata:
+  annotations:
+    avp.kubernetes.io/path: "sops-secret-enc.yaml"
+    avp.kubernetes.io/remove-missing: "true"
+    # avp.kubernetes.io/secret-version: "1"
+    # avp.kubernetes.io/kv-version: "1"
+  name: example-secret
+  namespace: default
+type: Opaque
+data:
+  secret: <secret>
