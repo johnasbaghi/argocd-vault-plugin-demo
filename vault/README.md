@@ -1,4 +1,4 @@
-This README is a guide on installing and testing AVP that uses Vault's kv store as its backend (AVP_Type=vault).
+This README is a guide for installing and testing AVP that uses Vault's kv store as its backend (AVP_Type=vault).
  
 # Install the AVP sidecar using the token authentication method
 
@@ -32,19 +32,15 @@ $ vault kv get secret/secret1
 
 ## Test AVP using AVP CLI
 
+### Install avp cli
+
+```
+brew install argocd-vault-plugin
+```
+
+### Generate a Secret manifest with the encrypted value using avp cli
+
 ```bash
-$ brew install argocd-vault-plugin
-
-$ cat test_avp/app/secret.yaml
-apiVersion: v1
-kind: Secret
-metadata:
-  name: some-secret
-  annotations:
-    avp.kubernetes.io/path: "secret/data/secret1"
-stringData:
-  SOME_SECRET: <key1>
-
 $ argocd-vault-plugin generate ./test_avp/app/secret.yaml
 apiVersion: v1
 kind: Secret
@@ -56,15 +52,19 @@ stringData:
   SOME_SECRET: val1
 ```
 
-Notice: the value of key1 (val1) should be injected into the secret.
+Notice: the decrypted value of key1 (val1) should be injected into the
+Secret manifest.
 
-## Test AVP by pushing this repo to a Git forge and creating an Application using app as your path, or by running the following
+## Test AVP on the cluster
+
+Push this repo to a Git forge and create an Application:
 
 ```bash
 kubectl apply -n argocd -f app.yaml
 ```
 
-Notice: AVP should create a secret valled some-secret with the value of key1 (val1). You can verify this by running the following:
+Notice: verify that the decrypted value of key1 (val1) is injected
+into a Secret called some-secret:
 
 ```bash
 $ k get secret some-secret -o jsonpath='{.data.SOME_SECRET}' | base64 --decode
