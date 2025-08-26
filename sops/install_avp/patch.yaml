@@ -5,20 +5,29 @@ metadata:
 spec:
   template:
     spec:
+      # Mount SA token for Kubernets auth
+      # Note: In 2.4.0 onward, there is a dedicated SA for repo-server (not default)
+      # Note: This is not fully supported for Kubernetes < v1.19
       automountServiceAccountToken: true
+
+      # Each of the embedded YAMLs inside cmp-plugin ConfigMap will be mounted into it's respective plugin sidecar
       volumes:
         - configMap:
             name: cmp-plugin
           name: cmp-plugin
         - name: custom-tools
           emptyDir: {}
+        - name: sops-age
+          secret:
+            secretName: sops-age
+
       # Download tools
       initContainers:
       - name: download-tools
         image: registry.access.redhat.com/ubi8
         env:
           - name: AVP_VERSION
-            value: 1.18.0
+            value: 1.16.1
         command: [sh, -c]
         args:
           - >-
@@ -29,12 +38,15 @@ spec:
         volumeMounts:
           - mountPath: /custom-tools
             name: custom-tools
-
+            
       # argocd-vault-plugin with Helm
       containers:
       - name: avp-helm
         command: [/var/run/argocd/argocd-cmp-server]
-        image: quay.io/argoproj/argocd:v2.7.9
+        image: quay.io/argoproj/argocd:v2.8.4
+        env:
+        - name: AVP_TYPE
+          value: "sops"
         securityContext:
           runAsNonRoot: true
           runAsUser: 999
@@ -56,10 +68,18 @@ spec:
             subPath: argocd-vault-plugin
             mountPath: /usr/local/bin/argocd-vault-plugin
 
+          - mountPath: /.config/sops/age/keys.txt
+            name: sops-age
+            subPath: age-key.txt
+
+
       # argocd-vault-plugin with Kustomize
       - name: avp-kustomize
         command: [/var/run/argocd/argocd-cmp-server]
-        image: quay.io/argoproj/argocd:v2.7.9
+        image: quay.io/argoproj/argocd:v2.8.4
+        env:
+        - name: AVP_TYPE
+          value: "sops"
         securityContext:
           runAsNonRoot: true
           runAsUser: 999
@@ -80,11 +100,18 @@ spec:
           - name: custom-tools
             subPath: argocd-vault-plugin
             mountPath: /usr/local/bin/argocd-vault-plugin
+          
+          - mountPath: /.config/sops/age/keys.txt
+            name: sops-age
+            subPath: age-key.txt
 
       # argocd-vault-plugin with plain YAML
       - name: avp
         command: [/var/run/argocd/argocd-cmp-server]
-        image: quay.io/argoproj/argocd:v2.7.9
+        image: quay.io/argoproj/argocd:v2.8.4
+        env:
+        - name: AVP_TYPE
+          value: "sops"
         securityContext:
           runAsNonRoot: true
           runAsUser: 999
@@ -105,6 +132,7 @@ spec:
           - name: custom-tools
             subPath: argocd-vault-plugin
             mountPath: /usr/local/bin/argocd-vault-plugin
-        envFrom:
-          - secretRef:
-              name: avp-secret
+
+          - mountPath: /.config/sops/age/keys.txt
+            name: sops-age
+            subPath: age-key.txt
